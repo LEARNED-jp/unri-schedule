@@ -677,16 +677,6 @@
         </select>
       </div>
       <div class="form-group">
-        <label>時間帯</label>
-        <select id="addPeriod">
-          <option value="morning">午前</option>
-          <option value="afternoon">午後</option>
-          <option value="evening">夕方・夜</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
         <label>インストラクター</label>
         <select id="addInstructor">
           <option value="KOU">KOU</option>
@@ -703,12 +693,53 @@
         </select>
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>時間（カンマ区切りで複数可）</label>
-        <input type="text" id="addHours" placeholder="10:00-14:00" value="">
+    <div id="timeSlots">
+      <div class="time-slot" data-slot="0">
+        <div class="form-row">
+          <div class="form-group">
+            <label>開始</label>
+            <select class="slot-start">
+              <option value="7:00">7:00</option><option value="7:30">7:30</option>
+              <option value="8:00">8:00</option><option value="8:30">8:30</option>
+              <option value="9:00">9:00</option><option value="9:30">9:30</option>
+              <option value="10:00" selected>10:00</option><option value="10:30">10:30</option>
+              <option value="11:00">11:00</option><option value="11:30">11:30</option>
+              <option value="12:00">12:00</option><option value="12:30">12:30</option>
+              <option value="13:00">13:00</option><option value="13:30">13:30</option>
+              <option value="14:00">14:00</option><option value="14:30">14:30</option>
+              <option value="15:00">15:00</option><option value="15:30">15:30</option>
+              <option value="16:00">16:00</option><option value="16:30">16:30</option>
+              <option value="17:00">17:00</option><option value="17:30">17:30</option>
+              <option value="18:00">18:00</option><option value="18:30">18:30</option>
+              <option value="19:00">19:00</option><option value="19:30">19:30</option>
+              <option value="20:00">20:00</option><option value="20:30">20:30</option>
+              <option value="21:00">21:00</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>終了</label>
+            <select class="slot-end">
+              <option value="7:00">7:00</option><option value="7:30">7:30</option>
+              <option value="8:00">8:00</option><option value="8:30">8:30</option>
+              <option value="9:00">9:00</option><option value="9:30">9:30</option>
+              <option value="10:00">10:00</option><option value="10:30">10:30</option>
+              <option value="11:00">11:00</option><option value="11:30">11:30</option>
+              <option value="12:00">12:00</option><option value="12:30">12:30</option>
+              <option value="13:00">13:00</option><option value="13:30">13:30</option>
+              <option value="14:00" selected>14:00</option><option value="14:30">14:30</option>
+              <option value="15:00">15:00</option><option value="15:30">15:30</option>
+              <option value="16:00">16:00</option><option value="16:30">16:30</option>
+              <option value="17:00">17:00</option><option value="17:30">17:30</option>
+              <option value="18:00">18:00</option><option value="18:30">18:30</option>
+              <option value="19:00">19:00</option><option value="19:30">19:30</option>
+              <option value="20:00">20:00</option><option value="20:30">20:30</option>
+              <option value="21:00">21:00</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
+    <button class="btn btn-clear" onclick="addTimeSlot()" style="margin-bottom:8px;">＋ 時間枠を追加</button>
     <div class="form-row">
       <div class="form-group">
         <label>備考（任意）</label>
@@ -844,20 +875,62 @@ function saveState() {
 // ============================================================
 //  Entry Management
 // ============================================================
+function getTimeSlotTemplate() {
+  const options = ['7:00','7:30','8:00','8:30','9:00','9:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00'];
+  const startOpts = options.map(t => '<option value="' + t + '">' + t + '</option>').join('');
+  const endOpts = options.map(t => '<option value="' + t + '">' + t + '</option>').join('');
+  return '<div class="time-slot"><div class="form-row"><div class="form-group"><label>開始</label><select class="slot-start">' + startOpts + '</select></div><div class="form-group"><label>終了</label><select class="slot-end">' + endOpts + '</select></div><button class="btn btn-danger" onclick="this.closest(\'.time-slot\').remove()" style="align-self:flex-end;margin-bottom:10px;">×</button></div></div>';
+}
+
+function addTimeSlot() {
+  const container = document.getElementById('timeSlots');
+  container.insertAdjacentHTML('beforeend', getTimeSlotTemplate());
+}
+
+function resetTimeSlots() {
+  const container = document.getElementById('timeSlots');
+  const slots = container.querySelectorAll('.time-slot');
+  // Keep only the first slot, remove the rest
+  for (let i = slots.length - 1; i > 0; i--) slots[i].remove();
+  // Reset first slot to defaults
+  const first = slots[0];
+  if (first) {
+    first.querySelector('.slot-start').value = '10:00';
+    first.querySelector('.slot-end').value = '14:00';
+  }
+}
+
+function detectPeriod(timeStr) {
+  const hour = parseInt(timeStr.split(':')[0]);
+  if (hour < 12) return 'morning';
+  if (hour < 17) return 'afternoon';
+  return 'evening';
+}
+
 function addEntry() {
   const day = document.getElementById('addDay').value;
-  const period = document.getElementById('addPeriod').value;
   const name = document.getElementById('addInstructor').value;
-  const hoursRaw = document.getElementById('addHours').value.trim();
   const note = document.getElementById('addNote').value.trim();
 
-  if (!hoursRaw) {
-    showToast('時間を入力してください');
+  // Collect time slots
+  const slots = document.querySelectorAll('#timeSlots .time-slot');
+  const hours = [];
+  let firstStart = null;
+  for (const slot of slots) {
+    const start = slot.querySelector('.slot-start').value;
+    const end = slot.querySelector('.slot-end').value;
+    if (!firstStart) firstStart = start;
+    if (start && end) {
+      hours.push(start + '-' + end);
+    }
+  }
+
+  if (hours.length === 0) {
+    showToast('時間を選択してください');
     return;
   }
 
-  const hours = hoursRaw.split(/[,、]/).map(h => h.trim()).filter(Boolean);
-
+  const period = detectPeriod(firstStart);
   scheduleEntries.push({ day, period, name, hours, ...(note ? { note } : {}) });
 
   // Sort entries by day order, then period
@@ -868,7 +941,7 @@ function addEntry() {
     return (periodOrder[a.period] || 0) - (periodOrder[b.period] || 0);
   });
 
-  document.getElementById('addHours').value = '';
+  resetTimeSlots();
   document.getElementById('addNote').value = '';
 
   saveState();
