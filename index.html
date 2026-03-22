@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>unri pilates - スケジュール作成</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+  @font-face {
+    font-family: 'LINE Seed JP';
+    src: url('https://cdn-font.line-scdn.net/lineseedjp/LINESeedJP_A_OTF_Rg.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'LINE Seed JP';
+    src: url('https://cdn-font.line-scdn.net/lineseedjp/LINESeedJP_A_OTF_Bd.woff2') format('woff2');
+    font-weight: 700;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'LINE Seed JP';
+    src: url('https://cdn-font.line-scdn.net/lineseedjp/LINESeedJP_A_OTF_Eb.woff2') format('woff2');
+    font-weight: 800;
+    font-display: swap;
+  }
+
+  /* ── App Layout ── */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #f5f3ef;
+    color: #333;
+    min-height: 100vh;
+  }
+
+  .app-header {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .app-header h1 {
+    font-family: 'LINE Seed JP', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .app-tabs {
+    display: flex;
+    background: #2a2a2a;
+    border-bottom: 1px solid #3a3a3a;
+    position: sticky;
+    top: 52px;
+    z-index: 99;
+  }
+
+  .app-tab {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: #999;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .app-tab.active {
+    color: #fff;
+    border-bottom-color: #c8a882;
+  }
+
+  .tab-content {
+    display: none;
+    padding: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  /* ── Editor Panel ── */
+  .section-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #9a8377;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #777;
+  }
+
+  .form-group select,
+  .form-group input {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    background: #faf9f7;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .form-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  .btn-primary {
+    background: #1a1a1a;
+    color: #fff;
+  }
+
+  .btn-primary:active {
+    background: #333;
+    transform: scale(0.98);
+  }
+
+  .btn-export {
+    background: #c8a882;
+    color: #fff;
+    font-size: 15px;
+    padding: 14px 20px;
+  }
+
+  .btn-export:active {
+    background: #b8956e;
+    transform: scale(0.98);
+  }
+
+  .btn-danger {
+    background: none;
+    color: #c44;
+    font-size: 12px;
+    padding: 4px 8px;
+    width: auto;
+  }
+
+  .btn-clear {
+    background: none;
+    color: #999;
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+
+  /* ── Entry List ── */
+  .entry-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .entry-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: #faf9f7;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  .entry-item .entry-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .entry-item .entry-day-period {
+    font-weight: 700;
+    color: #9a8377;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+
+  .entry-item .entry-detail {
+    font-weight: 500;
+  }
+
+  .entry-item .entry-hours {
+    font-size: 12px;
+    color: #777;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    color: #bbb;
+    font-size: 14px;
+  }
+
+  /* ── Preview Panel ── */
+  .preview-wrapper {
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .preview-clip {
+    overflow: hidden;
+    margin: 0 auto;
+  }
+
+  .preview-scaler {
+    transform-origin: top left;
+    width: 1080px;
+  }
+
+  /* ── Schedule (same as template) ── */
+  .schedule-container {
+    width: 1080px;
+    height: 1350px;
+    padding: 44px 48px 40px;
+    background: #faf9f5;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header { margin-bottom: 20px; flex-shrink: 0; }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #c8bdb4;
+  }
+
+  .header-left { display: flex; flex-direction: column; gap: 2px; }
+
+  .title-en {
+    font-family: 'LINE Seed JP', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: 0.1em;
+    color: #151411;
+    line-height: 1.3;
+  }
+
+  .title-location {
+    font-family: 'LINE Seed JP', sans-serif;
+    font-weight: 700;
+    font-size: 26px;
+    letter-spacing: 0.06em;
+    color: #151411;
+    margin-top: 4px;
+  }
+
+  .header-date {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 56px;
+    color: #151411;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    text-align: center;
+  }
+
+  .header-date .date-year {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: #9a8377;
+    letter-spacing: 0.1em;
+    display: block;
+    text-align: center;
+    margin-bottom: 0;
+  }
+
+  .col-headers {
+    display: grid;
+    grid-template-columns: 44px 1fr 1fr 1fr;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .col-header {
+    font-family: 'LINE Seed JP', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.14em;
+    text-align: center;
+    padding: 12px 0 8px;
+    color: #9a8377;
+  }
+
+  .schedule-grid {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .day-row {
+    display: grid;
+    grid-template-columns: 44px 1fr 1fr 1fr;
+    border-bottom: 2px solid #faf9f5;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .day-row.weekend { flex: 2; }
+  .day-row:last-child { border-bottom: none; }
+
+  .day-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'LINE Seed JP', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.18em;
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+    color: #9a8377;
+  }
+
+  .cell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px 14px;
+    border-right: 2px solid #faf9f5;
+    gap: 4px;
+    background: #f1ece5;
+    overflow: hidden;
+  }
+
+  .cell:last-child { border-right: none; }
+  .cell.morning   { background: #f1ece5; }
+  .cell.afternoon { background: #e8e0d6; }
+  .cell.evening   { background: #dfd5c8; }
+
+  .cell.empty { position: relative; }
+  .cell.empty.morning   { background: #f1ece5; }
+  .cell.empty.afternoon { background: #e8e0d6; }
+  .cell.empty.evening   { background: #dfd5c8; }
+  .cell.empty::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(
+      to bottom right,
+      transparent calc(50% - 0.5px),
+      #c8bdb4 calc(50% - 0.5px),
+      #c8bdb4 calc(50% + 0.5px),
+      transparent calc(50% + 0.5px)
+    );
+  }
+  .cell.empty.evening::after {
+    background: linear-gradient(
+      to bottom right,
+      transparent calc(50% - 0.5px),
+      rgba(255,255,255,0.45) calc(50% - 0.5px),
+      rgba(255,255,255,0.45) calc(50% + 0.5px),
+      transparent calc(50% + 0.5px)
+    );
+  }
+
+  .instructor-entry {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .instructor-photo {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+    object-position: top center;
+    flex-shrink: 0;
+    background: #e0d8cf;
+  }
+
+  .cell-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+
+  .instructor-name {
+    font-family: 'LINE Seed JP', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    color: #1a1a1a;
+  }
+
+  .cell-hours {
+    font-family: 'LINE Seed JP', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+    color: #3a3330;
+  }
+
+  .cell-note {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    background: #1a1a1a;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-left: 6px;
+    vertical-align: middle;
+    letter-spacing: 0.02em;
+  }
+
+  .cell.multi { gap: 6px; padding: 8px 12px; }
+  .cell.multi .instructor-entry { gap: 10px; }
+  .cell.multi-3 { gap: 4px; padding: 6px 10px; }
+
+  .schedule-footer {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #c8bdb4;
+    font-size: 15px;
+    color: #3a3330;
+    line-height: 2;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+  }
+
+  /* ── Auth Screen ── */
+  .auth-screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #1a1a1a;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .auth-screen.hidden { display: none; }
+
+  .auth-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px 32px;
+    width: 90%;
+    max-width: 340px;
+    text-align: center;
+  }
+
+  .auth-box h2 {
+    font-family: 'LINE Seed JP', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #1a1a1a;
+  }
+
+  .auth-box p {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 20px;
+  }
+
+  .auth-box input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 18px;
+    font-family: inherit;
+    text-align: center;
+    letter-spacing: 0.3em;
+    margin-bottom: 12px;
+    background: #faf9f7;
+  }
+
+  .auth-box input.error {
+    border-color: #e44;
+    animation: shake 0.3s;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .auth-error-msg {
+    color: #e44;
+    font-size: 13px;
+    margin-bottom: 8px;
+    min-height: 20px;
+  }
+
+  /* ── Loading overlay ── */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .loading-overlay.active {
+    display: flex;
+  }
+
+  .loading-box {
+    background: #fff;
+    padding: 32px;
+    border-radius: 16px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid #eee;
+    border-top-color: #c8a882;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1a1a1a;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 200;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+
+<div class="auth-screen" id="authScreen">
+  <div class="auth-box">
+    <h2>unri pilates</h2>
+    <p>Schedule Maker</p>
+    <input type="password" id="authInput" placeholder="パスワード" inputmode="numeric" maxlength="10" autocomplete="off">
+    <div class="auth-error-msg" id="authError"></div>
+    <button class="btn btn-primary" onclick="checkAuth()">ログイン</button>
+  </div>
+</div>
+
+<div class="app-header">
+  <h1>unri pilates</h1>
+  <span style="font-size:12px;color:#999;">Schedule Maker</span>
+</div>
+
+<div class="app-tabs">
+  <div class="app-tab active" data-tab="editor">編集</div>
+  <div class="app-tab" data-tab="preview">プレビュー</div>
+</div>
+
+<!-- ── Editor Tab ── -->
+<div class="tab-content active" id="tab-editor">
+
+  <div class="section-card">
+    <div class="section-title">基本設定</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>年</label>
+        <input type="number" id="inputYear" value="2026" min="2024" max="2030">
+      </div>
+      <div class="form-group">
+        <label>月</label>
+        <select id="inputMonth">
+          <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
+          <option value="4" selected>4月</option><option value="5">5月</option><option value="6">6月</option>
+          <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
+          <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>店舗</label>
+        <input type="text" id="inputLocation" value="国領店">
+      </div>
+      <div class="form-group">
+        <label>タイプ</label>
+        <input type="text" id="inputType" value="PERSONAL">
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">スケジュール追加</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>曜日</label>
+        <select id="addDay">
+          <option value="mon">月 MON</option>
+          <option value="tue">火 TUE</option>
+          <option value="wed">水 WED</option>
+          <option value="thu">木 THU</option>
+          <option value="fri">金 FRI</option>
+          <option value="sat">土 SAT</option>
+          <option value="sun">日 SUN</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>時間帯</label>
+        <select id="addPeriod">
+          <option value="morning">午前</option>
+          <option value="afternoon">午後</option>
+          <option value="evening">夕方・夜</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>インストラクター</label>
+        <select id="addInstructor">
+          <option value="KOU">KOU</option>
+          <option value="SAEKO">SAEKO</option>
+          <option value="MIYUKI">MIYUKI</option>
+          <option value="YURIA">YURIA</option>
+          <option value="KIMARU">KIMARU</option>
+          <option value="MINAKO">MINAKO</option>
+          <option value="MASAHIRO">MASAHIRO</option>
+          <option value="YUI">YUI</option>
+          <option value="YUTA">YUTA</option>
+          <option value="HARUNA">HARUNA</option>
+          <option value="RINA">RINA</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>時間（カンマ区切りで複数可）</label>
+        <input type="text" id="addHours" placeholder="10:00-14:00" value="">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>備考（任意）</label>
+        <input type="text" id="addNote" placeholder="隔週 など">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addEntry()">追加</button>
+  </div>
+
+  <div class="section-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="section-title" style="margin-bottom:0;">登録済みスケジュール</div>
+      <button class="btn btn-clear" onclick="clearAll()">全削除</button>
+    </div>
+    <div id="entryList" class="entry-list" style="margin-top:12px;">
+      <div class="empty-state">まだスケジュールがありません</div>
+    </div>
+  </div>
+
+  <button class="btn btn-export" onclick="switchToPreviewAndExport()">プレビュー & PNG出力</button>
+</div>
+
+<!-- ── Preview Tab ── -->
+<div class="tab-content" id="tab-preview">
+  <div style="text-align:center;margin-bottom:12px;">
+    <button class="btn btn-export" onclick="exportPNG()" style="max-width:300px;margin:0 auto;">PNG ダウンロード</button>
+  </div>
+  <div class="preview-wrapper">
+    <div class="preview-clip" id="previewClip">
+    <div class="preview-scaler" id="previewScaler">
+      <div class="schedule-container" id="schedule">
+        <div class="header">
+          <div class="header-top">
+            <div class="header-left">
+              <div class="title-en">WEEKLY ROUTINE</div>
+              <div class="title-location" id="headerLocation">国領店 ─ PERSONAL</div>
+            </div>
+            <div class="header-date" id="headerDate">
+              <span class="date-year"></span>
+            </div>
+          </div>
+        </div>
+        <div class="col-headers">
+          <div></div>
+          <div class="col-header">MORNING</div>
+          <div class="col-header">AFTERNOON</div>
+          <div class="col-header">EVENING / NIGHT</div>
+        </div>
+        <div class="schedule-grid" id="scheduleGrid"></div>
+        <div class="schedule-footer">
+          ※ 1レッスン50分間、お着替え含めて60分です。<br>
+          ※ こちらは基本スケジュールです。インストラクターやスタジオの都合により、週によってはお休みなど変更がある場合がございます。<br>
+          ※ ピラティス・コンディショニングコースを実施している日もございます。<br>
+          ※ 確定スケジュールは予約開始後に予約サイトにてご確認ください。<br>
+          ※ 国領店は土曜日と日曜日のみ、最大2名様までご予約を受け付けております。同時間帯に別の会員様も別のインストラクターとレッスンを実施している可能性がございます。
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    PNG生成中...
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+//  State
+// ============================================================
+const INSTRUCTORS = {
+  KOU: 'photos/kou.webp',
+  SAEKO: 'photos/saeko.webp',
+  MIYUKI: 'photos/miyuki.webp',
+  YURIA: 'photos/yuria.webp',
+  KIMARU: 'photos/kimaru.webp',
+  MINAKO: 'photos/minako.webp',
+  MASAHIRO: 'photos/masahiro.webp',
+  YUI: 'photos/yui.webp',
+  YUTA: 'photos/yuta.webp',
+  HARUNA: 'photos/haruna.webp',
+  RINA: 'photos/rina.webp',
+};
+
+const DAY_LABELS = {
+  mon: 'MON', tue: 'TUE', wed: 'WED', thu: 'THU',
+  fri: 'FRI', sat: 'SAT', sun: 'SUN'
+};
+
+const DAY_JP = {
+  mon: '月', tue: '火', wed: '水', thu: '木',
+  fri: '金', sat: '土', sun: '日'
+};
+
+const PERIOD_JP = {
+  morning: '午前', afternoon: '午後', evening: '夕方・夜'
+};
+
+const DAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+let scheduleEntries = [];
+
+// Load from localStorage
+function loadState() {
+  try {
+    const saved = localStorage.getItem('unri-schedule');
+    if (saved) {
+      const data = JSON.parse(saved);
+      scheduleEntries = data.entries || [];
+      if (data.year) document.getElementById('inputYear').value = data.year;
+      if (data.month) document.getElementById('inputMonth').value = data.month;
+      if (data.location) document.getElementById('inputLocation').value = data.location;
+      if (data.type) document.getElementById('inputType').value = data.type;
+    }
+  } catch (e) {}
+}
+
+function saveState() {
+  localStorage.setItem('unri-schedule', JSON.stringify({
+    year: document.getElementById('inputYear').value,
+    month: document.getElementById('inputMonth').value,
+    location: document.getElementById('inputLocation').value,
+    type: document.getElementById('inputType').value,
+    entries: scheduleEntries,
+  }));
+}
+
+// ============================================================
+//  Entry Management
+// ============================================================
+function addEntry() {
+  const day = document.getElementById('addDay').value;
+  const period = document.getElementById('addPeriod').value;
+  const name = document.getElementById('addInstructor').value;
+  const hoursRaw = document.getElementById('addHours').value.trim();
+  const note = document.getElementById('addNote').value.trim();
+
+  if (!hoursRaw) {
+    showToast('時間を入力してください');
+    return;
+  }
+
+  const hours = hoursRaw.split(/[,、]/).map(h => h.trim()).filter(Boolean);
+
+  scheduleEntries.push({ day, period, name, hours, ...(note ? { note } : {}) });
+
+  // Sort entries by day order, then period
+  const periodOrder = { morning: 0, afternoon: 1, evening: 2 };
+  scheduleEntries.sort((a, b) => {
+    const dayDiff = DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day);
+    if (dayDiff !== 0) return dayDiff;
+    return (periodOrder[a.period] || 0) - (periodOrder[b.period] || 0);
+  });
+
+  document.getElementById('addHours').value = '';
+  document.getElementById('addNote').value = '';
+
+  saveState();
+  renderEntryList();
+  showToast('追加しました');
+}
+
+function removeEntry(index) {
+  scheduleEntries.splice(index, 1);
+  saveState();
+  renderEntryList();
+}
+
+function clearAll() {
+  if (!confirm('全てのスケジュールを削除しますか？')) return;
+  scheduleEntries = [];
+  saveState();
+  renderEntryList();
+}
+
+function renderEntryList() {
+  const list = document.getElementById('entryList');
+  if (scheduleEntries.length === 0) {
+    list.innerHTML = '<div class="empty-state">まだスケジュールがありません</div>';
+    return;
+  }
+
+  list.innerHTML = scheduleEntries.map((e, i) => `
+    <div class="entry-item">
+      <div class="entry-info">
+        <div class="entry-day-period">${DAY_JP[e.day]}(${DAY_LABELS[e.day]}) - ${PERIOD_JP[e.period]}</div>
+        <div class="entry-detail">${e.name}</div>
+        <div class="entry-hours">${e.hours.join(', ')}${e.note ? ' [' + e.note + ']' : ''}</div>
+      </div>
+      <button class="btn btn-danger" onclick="removeEntry(${i})">削除</button>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+//  Schedule Renderer (same logic as template)
+// ============================================================
+function renderSchedule() {
+  const year = parseInt(document.getElementById('inputYear').value);
+  const month = parseInt(document.getElementById('inputMonth').value);
+  const location = document.getElementById('inputLocation').value;
+  const type = document.getElementById('inputType').value;
+
+  // Header
+  const dateEl = document.getElementById('headerDate');
+  dateEl.innerHTML = '<span class="date-year">' + year + '</span>' + month;
+  document.getElementById('headerLocation').textContent = location + ' \u2500 ' + type;
+
+  // Grid
+  const grid = document.getElementById('scheduleGrid');
+  grid.innerHTML = '';
+
+  const days = DAY_ORDER.map(key => ({ key, label: DAY_LABELS[key] }));
+  const periods = ['morning', 'afternoon', 'evening'];
+  const weekendKeys = ['sat', 'sun'];
+
+  const activeDays = days.filter(d =>
+    scheduleEntries.some(s => s.day === d.key)
+  );
+
+  if (activeDays.length === 0) {
+    grid.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;flex:1;color:#bbb;font-size:18px;">スケジュールを追加してください</div>';
+    return;
+  }
+
+  activeDays.forEach(day => {
+    const row = document.createElement('div');
+    const isWeekend = weekendKeys.includes(day.key);
+    row.className = 'day-row' + (isWeekend ? ' weekend' : '');
+
+    const label = document.createElement('div');
+    label.className = 'day-label';
+    label.textContent = day.label;
+    row.appendChild(label);
+
+    periods.forEach(period => {
+      const entries = scheduleEntries.filter(
+        s => s.day === day.key && s.period === period
+      );
+      const cell = document.createElement('div');
+
+      if (entries.length > 0) {
+        let cellClass = 'cell ' + period;
+        if (entries.length >= 3) cellClass += ' multi multi-3';
+        else if (entries.length > 1) cellClass += ' multi';
+        cell.className = cellClass;
+
+        entries.forEach(entry => {
+          const entryDiv = document.createElement('div');
+          entryDiv.className = 'instructor-entry';
+
+          const img = document.createElement('img');
+          img.className = 'instructor-photo';
+          img.src = INSTRUCTORS[entry.name] || '';
+          img.alt = entry.name;
+          img.loading = 'eager';
+          img.crossOrigin = 'anonymous';
+          img.onerror = function () { this.style.display = 'none'; };
+          entryDiv.appendChild(img);
+
+          const info = document.createElement('div');
+          info.className = 'cell-info';
+
+          const nameEl = document.createElement('div');
+          nameEl.className = 'instructor-name';
+          nameEl.textContent = entry.name;
+          info.appendChild(nameEl);
+
+          const hoursEl = document.createElement('div');
+          hoursEl.className = 'cell-hours';
+          let hoursHTML = entry.hours.join('<br>');
+          if (entry.note) {
+            hoursHTML += '<span class="cell-note">' + entry.note + '</span>';
+          }
+          hoursEl.innerHTML = hoursHTML;
+          info.appendChild(hoursEl);
+
+          entryDiv.appendChild(info);
+          cell.appendChild(entryDiv);
+        });
+      } else {
+        cell.className = 'cell empty ' + period;
+      }
+
+      row.appendChild(cell);
+    });
+
+    grid.appendChild(row);
+  });
+}
+
+// ============================================================
+//  Preview Scaling
+// ============================================================
+function scalePreview() {
+  const wrapper = document.querySelector('.preview-wrapper');
+  const clip = document.getElementById('previewClip');
+  const scaler = document.getElementById('previewScaler');
+  if (!wrapper || !clip) return;
+  const wrapperWidth = wrapper.clientWidth - 32;
+  const scale = Math.min(1, wrapperWidth / 1080);
+  scaler.style.transform = 'scale(' + scale + ')';
+  clip.style.width = Math.floor(1080 * scale) + 'px';
+  clip.style.height = Math.floor(1350 * scale) + 'px';
+}
+
+// ============================================================
+//  Tab Switching
+// ============================================================
+document.querySelectorAll('.app-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.app-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'preview') {
+      renderSchedule();
+      setTimeout(scalePreview, 50);
+    }
+  });
+});
+
+function switchToPreviewAndExport() {
+  document.querySelectorAll('.app-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelector('[data-tab="preview"]').classList.add('active');
+  document.getElementById('tab-preview').classList.add('active');
+  renderSchedule();
+  setTimeout(scalePreview, 50);
+}
+
+// ============================================================
+//  PNG Export
+// ============================================================
+async function exportPNG() {
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.classList.add('active');
+
+  try {
+    // Render at full size for capture
+    const el = document.getElementById('schedule');
+
+    const canvas = await html2canvas(el, {
+      width: 1080,
+      height: 1350,
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#faf9f5',
+    });
+
+    const link = document.createElement('a');
+    const year = document.getElementById('inputYear').value;
+    const month = document.getElementById('inputMonth').value.padStart(2, '0');
+    link.download = 'schedule-' + year + month + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+
+    showToast('ダウンロードしました');
+  } catch (e) {
+    showToast('エラー: ' + e.message);
+    console.error(e);
+  } finally {
+    overlay.classList.remove('active');
+  }
+}
+
+// ============================================================
+//  Toast
+// ============================================================
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// ============================================================
+//  Auth
+// ============================================================
+const AUTH_HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'; // sha256 of 1234
+
+async function sha256(text) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function checkAuth() {
+  const input = document.getElementById('authInput');
+  const error = document.getElementById('authError');
+  const hash = await sha256(input.value);
+
+  if (hash === AUTH_HASH) {
+    sessionStorage.setItem('unri-auth', 'ok');
+    document.getElementById('authScreen').classList.add('hidden');
+  } else {
+    error.textContent = 'パスワードが違います';
+    input.classList.add('error');
+    setTimeout(() => input.classList.remove('error'), 400);
+  }
+}
+
+function initAuth() {
+  if (sessionStorage.getItem('unri-auth') === 'ok') {
+    document.getElementById('authScreen').classList.add('hidden');
+  }
+  document.getElementById('authInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') checkAuth();
+  });
+}
+
+// ============================================================
+//  Init
+// ============================================================
+window.addEventListener('resize', () => {
+  if (document.getElementById('tab-preview').classList.contains('active')) {
+    scalePreview();
+  }
+});
+
+initAuth();
+loadState();
+renderEntryList();
+</script>
+
+</body>
+</html>
